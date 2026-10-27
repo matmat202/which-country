@@ -132,6 +132,31 @@ export function dayKey(d = new Date()) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
+// The first day a daily ten was served. ?day= plays any day from here up to yesterday.
+export const FIRST_DAY = '2026-10-26';
+
+export function prevDay(key) {
+  const d = new Date(key + 'T12:00:00');
+  d.setDate(d.getDate() - 1);
+  return dayKey(d);
+}
+
+// A ?day= worth honouring: a real calendar date, FIRST_DAY or later and before `today`.
+// Anything else is null, and the page plays today's ten.
+export function pastDay(param, today) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(param || '')) return null;
+  const d = new Date(param + 'T12:00:00');
+  if (Number.isNaN(d.getTime()) || dayKey(d) !== param) return null;
+  return param >= FIRST_DAY && param < today ? param : null;
+}
+
+// The latest day before `from` whose ten is unfinished, back to FIRST_DAY; null if none.
+// `done(day)` says whether that day's ten was played to the end.
+export function missedDay(from, done) {
+  for (let d = prevDay(from); d >= FIRST_DAY; d = prevDay(d)) if (!done(d)) return d;
+  return null;
+}
+
 export function shareText(day, marks) {
   const score = marks.filter(Boolean).length;
   return `Which Country? ${day}: ${score}/${marks.length}\n${marks.map((m) => (m ? '🟩' : '🟥')).join('')}`;
