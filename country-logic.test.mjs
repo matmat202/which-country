@@ -39,6 +39,17 @@ eq('metric order: every metric before a repeat', [new Set(ord.slice(0, 4)).size,
 ok('metric order: never the same twice running', Array.from({ length: 200 }, (_, s) => L.metricOrder(['a', 'b', 'c'], L.rng(s), 10))
   .every((o) => o.every((x, k) => !k || x !== o[k - 1])));
 
+// --- exact edges -------------------------------------------------------------------------
+eq('rng(1), pinned', (() => { const r = L.rng(1); return [r(), r(), r()]; })(), [0.6270739405881613, 0.002735721180215478, 0.5274470399599522]);
+eq('metric order, pinned (the shuffle and the no-repeat rotation)', [L.metricOrder(['a', 'b', 'c', 'd', 'e'], L.rng(3), 12), L.metricOrder(['a', 'b'], L.rng(9), 5)],
+  [['c', 'e', 'b', 'a', 'd', 'c', 'a', 'e', 'b', 'd', 'e', 'd'], ['b', 'a', 'b', 'a', 'b']]);
+eq('the bands, as designed', L.BANDS, [[0.5, 1], [0.4, 0.8], [0.3, 0.6], [0.24, 0.48], [0.18, 0.38], [0.12, 0.3], [0.08, 0.22], [0.05, 0.16], [0.03, 0.11], [0.012, 0.07]]);
+eq('pop: a billion is the first "billion"', [L.fmt('pop', 1e9), L.fmt('pop', 999.4e6), L.fmt('pop', 1e8), L.fmt('pop', 99.94e6)], ['1.00 billion', '999 million', '100 million', '99.9 million']);
+eq('a tie: the first named is "higher"', [L.higherIndex(5, 5), L.verdict({ id: 'net' }, 'A', 5, 'B', 5)], [0, 'A: 5%. B: 5%. 0% higher.']);
+eq('times: 1.95 is the first "times as high", and lo = 1 is not zero', [L.times(19.5, 10), L.times(19.49, 10), L.times(5, 1)], ['2.0 times as high', '95% higher', '5.0 times as high']);
+eq('missedDay reaches FIRST_DAY itself, and no further', [L.missedDay('2026-10-27', () => false), L.missedDay('2026-10-27', (d) => d !== '2026-10-26'), L.missedDay('2026-10-26', () => false)],
+  ['2026-10-26', '2026-10-26', null]);
+
 // --- a made-up pool ---------------------------------------------------------------------
 const N = 120;
 const fake = {
@@ -77,6 +88,15 @@ ok('picks lean populous (median in the top 40%)', median < N * 0.4, median);
 ok('but reach the tail', Math.max(...picks) > N * 0.8, Math.max(...picks));
 const tiny = { countries: [['a', 'A'], ['b', 'B'], ['c', 'C']], metrics: [{ id: 'kids' }], values: { kids: [1, 2, 3] } };
 eq('a pool too small for ten gives what it can', L.roundsFor(tiny, 'x').length, 1);
+eq('more rounds than bands: the rest use the last band', L.roundsFor(fake, 'n', 12).length, 12);
+// A sparse pool, where few countries have each number and the draws lean away from them, so
+// bands exhaust and widen. An exhausted loop draws the same stream whatever the band, so a
+// try more or less, or a different widening, only shows when the fitting draw sits on the
+// boundary. Each seed was searched for: it tells one widening or try-count change apart.
+const sparse = { countries: Array.from({ length: N }, (_, i) => [`C${i}`, `C${i}`]), metrics: [{ id: 'kids' }, { id: 'net' }],
+  values: { kids: Array.from({ length: N }, (_, i) => (i > 70 ? 1 + i / 50 : null)), net: Array.from({ length: N }, (_, i) => (i % 9 ? null : i)) } };
+eq('widening and try counts, pinned on searched seeds', Object.fromEntries(['w0', 'w1', 'w8', 'w15', 'w92', 'w127', 'w242'].map((s) => [s, L.roundsFor(sparse, s).map((x) => [x.m[0], x.a, x.b])])),
+  {'w0': [['n', 72, 0], ['k', 89, 109], ['n', 81, 45], ['k', 93, 77], ['n', 63, 27], ['k', 92, 86], ['n', 36, 18], ['k', 90, 85], ['n', 54, 9], ['k', 73, 74]], 'w1': [['k', 110, 82], ['n', 72, 0], ['k', 93, 75], ['n', 9, 45], ['k', 88, 79], ['n', 27, 36], ['k', 80, 84], ['n', 54, 18], ['k', 92, 90], ['n', 81, 63]], 'w8': [['n', 0, 72], ['k', 110, 80], ['n', 54, 9], ['k', 75, 87], ['n', 63, 36], ['k', 77, 83], ['n', 18, 45], ['k', 85, 90], ['n', 108, 99], ['k', 73, 71]], 'w15': [['n', 0, 63], ['k', 73, 100], ['n', 54, 9], ['k', 102, 82], ['n', 45, 18], ['k', 106, 93], ['n', 36, 27], ['k', 90, 86], ['k', 76, 78]], 'w92': [['n', 0, 108], ['k', 74, 97], ['n', 9, 45], ['k', 88, 107], ['n', 36, 81], ['k', 92, 82], ['n', 99, 72], ['k', 85, 79], ['n', 18, 27], ['k', 73, 75]], 'w127': [['n', 81, 18], ['k', 87, 111], ['n', 36, 0], ['k', 92, 72], ['n', 27, 54], ['k', 94, 82], ['n', 9, 45], ['k', 75, 71], ['k', 88, 90]], 'w242': [['n', 72, 0], ['k', 73, 104], ['n', 63, 18], ['k', 96, 81], ['n', 45, 9], ['k', 79, 71], ['n', 54, 36], ['k', 78, 74], ['k', 75, 76]]});
 
 // --- earlier days (?day=) ----------------------------------------------------------------
 eq('prevDay crosses a month', [L.prevDay('2026-11-01'), L.prevDay('2027-01-01')], ['2026-10-31', '2026-12-31']);
@@ -121,6 +141,14 @@ if (existsSync(poolFile) && existsSync(factFile)) {
   eq('shipped: 120 days of full tens', days.every((d) => d.length === 10), true);
   eq('shipped: no pair shows the same number', days.flat().filter((x) => L.fmt(x.m, P.values[x.m][x.a]) === L.fmt(x.m, P.values[x.m][x.b])).length, 0);
   eq('shipped: no day asks one metric three times', days.every((d) => Object.values(d.reduce((a, x) => ({ ...a, [x.m]: (a[x.m] || 0) + 1 }), {})).every((n) => n <= 2)), true);
+  // The two days actually served (pool.json and the dealing code unchanged since launch), pinned
+  // by metric, country and side. "The same day gives the same ten" compares a day with itself,
+  // which every rng, hash, shuffle and band constant satisfies; a stored pick is a side.
+  const served = (d) => L.roundsFor(P, d).map((x) => [x.m, P.countries[x.a][1], P.countries[x.b][1]]);
+  eq('shipped: 2026-10-26 as served', served('2026-10-26'), [['pop', 'BIH', 'DZA'], ['gdp', 'SWE', 'LKA'], ['urban', 'MOZ', 'AGO'], ['life', 'FIN', 'IND'],
+    ['net', 'PHL', 'IRN'], ['age', 'UKR', 'BRA'], ['co2', 'SLV', 'DOM'], ['kids', 'UGA', 'CAF'], ['co2', 'COL', 'BOL'], ['urban', 'USA', 'DEU']]);
+  eq('shipped: 2026-10-27 as served', served('2026-10-27'), [['gdp', 'IRL', 'SLV'], ['kids', 'COD', 'IND'], ['urban', 'ARM', 'PAK'], ['net', 'TGO', 'IRN'],
+    ['pop', 'TZA', 'CHL'], ['co2', 'CMR', 'ETH'], ['life', 'KEN', 'ZMB'], ['age', 'FRA', 'GBR'], ['urban', 'CHN', 'ITA'], ['life', 'BLR', 'ROU']]);
 } else ok('shipped: site/data/pool.json and test/facts.json exist (run build.py, test/facts.py)', false);
 
 console.log(`${fail ? 'FAILED' : 'ok'}: ${pass} passed, ${fail} failed`);
