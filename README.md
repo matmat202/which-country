@@ -9,6 +9,17 @@ and by the last they're neck and neck. After each answer you see both numbers as
 where they come from. Everyone gets the same ten, a new set arrives at your midnight, and
 your streak and results stay in your browser.
 
+## Mercator Trap
+
+**<https://matmat202.github.io/which-country/size.html>**
+
+Two countries, drawn at one scale in the Mercator projection that most web maps use. Tap
+the one that is really bigger, then watch both redrawn at their true area. Seven of each
+day's ten are traps, where the country drawn bigger is really smaller (Finland and Japan,
+Sweden and Chad). The other three are honest, so "always pick the one nearer the equator"
+loses. Outlines are [Natural Earth](https://www.naturalearthdata.com/) 1:110m (public
+domain). Both areas come from the same outline, so they're shown to two figures.
+
 ## Where the numbers come from
 
 [Our World in Data](https://ourworldindata.org/) grapher charts, all openly licensed (CC BY
