@@ -149,6 +149,38 @@ if (existsSync(poolFile) && existsSync(factFile)) {
     ['net', 'PHL', 'IRN'], ['age', 'UKR', 'BRA'], ['co2', 'SLV', 'DOM'], ['kids', 'UGA', 'CAF'], ['co2', 'COL', 'BOL'], ['urban', 'USA', 'DEU']]);
   eq('shipped: 2026-10-27 as served', served('2026-10-27'), [['gdp', 'IRL', 'SLV'], ['kids', 'COD', 'IND'], ['urban', 'ARM', 'PAK'], ['net', 'TGO', 'IRN'],
     ['pop', 'TZA', 'CHL'], ['co2', 'CMR', 'ETH'], ['life', 'KEN', 'ZMB'], ['age', 'FRA', 'GBR'], ['urban', 'CHN', 'ITA'], ['life', 'BLR', 'ROU']]);
+  // Served since (bin/mutate survivors, 2026-11-11): country-logic.js, app.js and pool.json
+  // byte-identical to the live site that day and unchanged in git since 10-27. 11-11 is
+  // served east of UTC.
+  const SERVED = {
+    '2026-10-28': [["co2", "IRN", "YEM"], ["net", "DZA", "JOR"], ["urban", "IDN", "LKA"], ["gdp", "ARG", "PNG"], ["pop", "ARE", "CMR"], ["kids", "IRQ", "GTM"], ["age", "HTI", "TKM"], ["life", "MYS", "CZE"], ["age", "BWA", "GHA"], ["kids", "MEX", "PHL"]],
+    '2026-10-29': [["urban", "BGD", "SLV"], ["net", "ITA", "MLI"], ["co2", "ECU", "NZL"], ["pop", "CAN", "LAO"], ["life", "TUN", "ARE"], ["age", "BEN", "EGY"], ["kids", "KOR", "NOR"], ["gdp", "MEX", "IDN"], ["pop", "NER", "KAZ"], ["kids", "MMR", "PHL"]],
+    '2026-10-30': [["age", "BEL", "HTI"], ["co2", "CHN", "BGD"], ["urban", "RUS", "LBR"], ["net", "KGZ", "EGY"], ["gdp", "MDG", "IRQ"], ["kids", "RWA", "ZAF"], ["pop", "ARG", "THA"], ["life", "DZA", "DOM"], ["gdp", "MEX", "BLR"], ["net", "NLD", "JOR"]],
+    '2026-10-31': [["co2", "ETH", "SAU"], ["gdp", "TGO", "BRA"], ["life", "KEN", "RUS"], ["net", "IDN", "MWI"], ["urban", "ZMB", "BDI"], ["age", "JOR", "NGA"], ["kids", "TUR", "VNM"], ["pop", "PRK", "ARG"], ["urban", "MRT", "MAR"], ["life", "IRN", "CHN"]],
+    '2026-11-01': [["life", "IDN", "FRA"], ["net", "ETH", "RUS"], ["co2", "GBR", "SLV"], ["pop", "JPN", "TCD"], ["gdp", "KGZ", "BFA"], ["kids", "BRA", "POL"], ["urban", "AUT", "USA"], ["age", "GTM", "ZAF"], ["gdp", "MMR", "AGO"], ["co2", "VNM", "HUN"]],
+    '2026-11-02': [["kids", "BEN", "FRA"], ["co2", "CHN", "AFG"], ["urban", "COL", "IDN"], ["age", "KGZ", "UGA"], ["net", "PHL", "PRT"], ["gdp", "USA", "ESP"], ["pop", "PAK", "ARG"], ["life", "URY", "TUR"], ["urban", "KHM", "KEN"], ["age", "SSD", "TGO"]],
+    '2026-11-03': [["urban", "CHN", "NER"], ["net", "CAN", "IND"], ["gdp", "DEU", "IRQ"], ["co2", "SVK", "SEN"], ["kids", "EGY", "COD"], ["life", "TZA", "SYR"], ["pop", "MEX", "ESP"], ["age", "KWT", "TUR"], ["net", "UZB", "CZE"], ["pop", "VNM", "THA"]],
+    '2026-11-04': [["gdp", "NER", "POL"], ["net", "PAK", "MYS"], ["kids", "MWI", "TUN"], ["life", "CHL", "VEN"], ["age", "BGD", "MOZ"], ["urban", "PHL", "BFA"], ["co2", "ESP", "KOR"], ["pop", "SWE", "BLR"], ["net", "GBR", "RUS"], ["kids", "TGO", "CMR"]],
+    '2026-11-05': [["gdp", "MMR", "GRC"], ["age", "CAN", "GIN"], ["urban", "USA", "PAK"], ["net", "DEU", "CUB"], ["kids", "IND", "GHA"], ["pop", "RUS", "MDG"], ["life", "BRA", "JOR"], ["co2", "DZA", "ARG"], ["kids", "COD", "TZA"], ["co2", "NLD", "JPN"]],
+    '2026-11-06': [["urban", "ARG", "EGY"], ["age", "FRA", "UGA"], ["net", "SRB", "COD"], ["gdp", "THA", "PAK"], ["kids", "IDN", "IRQ"], ["pop", "MMR", "TWN"], ["life", "IND", "VNM"], ["co2", "NGA", "SYR"], ["urban", "CIV", "PHL"], ["age", "KOR", "ESP"]],
+    '2026-11-07': [["urban", "YEM", "COL"], ["pop", "BOL", "BGD"], ["co2", "ARE", "IND"], ["age", "FRA", "PHL"], ["gdp", "COD", "KEN"], ["life", "VNM", "IRN"], ["net", "RUS", "CHN"], ["kids", "BGR", "IDN"], ["life", "NGA", "NER"], ["kids", "MOZ", "CAF"]],
+    '2026-11-08': [["net", "IND", "USA"], ["co2", "AFG", "ARG"], ["kids", "TCD", "VNM"], ["gdp", "THA", "ETH"], ["urban", "CHN", "MOZ"], ["life", "PRY", "IDN"], ["age", "NGA", "SYR"], ["pop", "PAK", "TUR"], ["age", "HND", "KEN"], ["net", "RUS", "DEU"]],
+    '2026-11-09': [["kids", "MWI", "CHN"], ["urban", "IND", "MEX"], ["life", "BRA", "JPN"], ["net", "MAR", "KHM"], ["co2", "SSD", "SYR"], ["age", "CUB", "DEU"], ["gdp", "TKM", "ARG"], ["pop", "CAN", "ZAF"], ["co2", "IRN", "KAZ"], ["gdp", "SLE", "TZA"]],
+    '2026-11-10': [["urban", "MEX", "IND"], ["kids", "MMR", "MRT"], ["pop", "GBR", "NIC"], ["net", "UGA", "LKA"], ["co2", "CIV", "BRA"], ["life", "BGD", "MNG"], ["gdp", "AGO", "ECU"], ["age", "ZMB", "BDI"], ["urban", "ESP", "RUS"], ["pop", "CHN", "NGA"]],
+    '2026-11-11': [["kids", "TZA", "USA"], ["urban", "KOR", "PAK"], ["co2", "ETH", "IND"], ["gdp", "MEX", "NGA"], ["life", "FRA", "POL"], ["net", "PHL", "VNM"], ["age", "BEN", "SEN"], ["pop", "ESP", "UZB"], ["life", "CHN", "DZA"], ["gdp", "BOL", "BGD"]],
+  };
+  for (const [d, want] of Object.entries(SERVED)) eq(`shipped: ${d} as served`, served(d), want);
+  // The deal is frozen, not just its served days (2026-11-11). Pinning only served days goes
+  // stale every midnight: on 10-27 the band constants were left as "re-deal only future days",
+  // and 15 days later those days had been played. So two years from launch are hashed. A
+  // deliberate retune must start on a date not yet served, the way poolFile() does, and then
+  // move this hash in the same commit.
+  {
+    const days = []; for (let d = '2026-10-26'; days.length < 731; ) { days.push(d); const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); d = x.toISOString().slice(0, 10); }
+    const h = (await import('node:crypto')).createHash('sha256');
+    for (const d of days) h.update(d + JSON.stringify(L.roundsFor(P, d)));
+    eq('two years of tens from launch, unchanged', h.digest('hex'), 'b9b0a048f7d75d18482c46968cd3e404bba91b3797832fc3b8961f2be2ca2c4f');
+  }
 } else ok('shipped: site/data/pool.json and test/facts.json exist (run build.py, test/facts.py)', false);
 
 console.log(`${fail ? 'FAILED' : 'ok'}: ${pass} passed, ${fail} failed`);
