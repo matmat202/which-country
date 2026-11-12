@@ -11,9 +11,16 @@ let POOL = null, M = {};
 let game = null; // { key, day, practice, rounds, picks, showing }
 
 // `past` is an earlier day's ten (from ?day=): saved, shareable, outside the streak.
-function start(practice, past = null) {
+// Each pool file is fetched once; a day before L.FRESH_FROM is dealt from the one it was played on.
+const pools = {};
+const loadPool = (f) => (pools[f] ??= fetch(f).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).catch((e) => { delete pools[f]; throw e; }));
+
+async function start(practice, past = null) {
   const day = past || L.dayKey();
   const key = practice ? `practice-${Date.now().toString(36)}` : day;
+  try { POOL = await loadPool(L.poolFile(key)); } catch (e) { fail(e); return; }
+  M = Object.fromEntries(POOL.metrics.map((m) => [m.id, m]));
+  $('count').textContent = POOL.countries.length.toLocaleString('en-US');
   game = { key, day, practice, past: !!past && !practice, rounds: L.roundsFor(POOL, key), picks: practice ? [] : store.get('wc:' + day, []) };
   $('daily').hidden = !practice && !game.past;
   render();
@@ -171,11 +178,9 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-fetch('data/pool.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((p) => {
-  POOL = p; M = Object.fromEntries(p.metrics.map((m) => [m.id, m]));
-  $('count').textContent = p.countries.length.toLocaleString('en-US');
-  start(false, L.pastDay(new URLSearchParams(location.search).get('day'), L.dayKey()));
-}).catch((e) => {
+function fail(e) {
   $('round').textContent = '';
   $('out').textContent = `Could not load the numbers (${e.message}). Reload to try again.`;
-});
+}
+
+start(false, L.pastDay(new URLSearchParams(location.search).get('day'), L.dayKey()));

@@ -144,7 +144,15 @@ if (existsSync(poolFile) && existsSync(factFile)) {
   // The two days actually served (pool.json and the dealing code unchanged since launch), pinned
   // by metric, country and side. "The same day gives the same ten" compares a day with itself,
   // which every rng, hash, shuffle and band constant satisfies; a stored pick is a side.
-  const served = (d) => L.roundsFor(P, d).map((x) => [x.m, P.countries[x.a][1], P.countries[x.b][1]]);
+  // Served from the launch pool, frozen as pool-1.json when GCB 2026 refreshed CO2 (2026-11-12).
+  const P1 = JSON.parse(readFileSync(here('./data/pool-1.json'), 'utf8'));
+  eq('pool-1.json is the pool as first shipped', (await import('node:crypto')).createHash('sha256').update(readFileSync(here('./data/pool-1.json'))).digest('hex'),
+    'e9a5a16fe1a688f0dac5e5f72c9daa5a969760a3aa59a51da51ec5b0c453d85e');
+  eq('each day reads the pool it was served from', ['2026-10-26', '2026-11-12', '2026-11-13', L.FRESH_FROM, '2026-11-15', '2027-03-01', 'practice-mhx2a9', '2026-11-1'].map(L.poolFile),
+    ['data/pool-1.json', 'data/pool-1.json', 'data/pool-1.json', 'data/pool.json', 'data/pool.json', 'data/pool.json', 'data/pool.json', 'data/pool.json']);
+  ok('the fresh pool starts on a day not yet served anywhere when it shipped', L.FRESH_FROM > '2026-11-13');
+  eq('index.html preloads by the same date', (readFileSync(here('./index.html'), 'utf8').match(/key < '([\d-]+)' \? 'data\/pool-1\.json'/) || [])[1], L.FRESH_FROM);
+  const served = (d) => L.roundsFor(P1, d).map((x) => [x.m, P1.countries[x.a][1], P1.countries[x.b][1]]);
   eq('shipped: 2026-10-26 as served', served('2026-10-26'), [['pop', 'BIH', 'DZA'], ['gdp', 'SWE', 'LKA'], ['urban', 'MOZ', 'AGO'], ['life', 'FIN', 'IND'],
     ['net', 'PHL', 'IRN'], ['age', 'UKR', 'BRA'], ['co2', 'SLV', 'DOM'], ['kids', 'UGA', 'CAF'], ['co2', 'COL', 'BOL'], ['urban', 'USA', 'DEU']]);
   eq('shipped: 2026-10-27 as served', served('2026-10-27'), [['gdp', 'IRL', 'SLV'], ['kids', 'COD', 'IND'], ['urban', 'ARM', 'PAK'], ['net', 'TGO', 'IRN'],
@@ -178,8 +186,12 @@ if (existsSync(poolFile) && existsSync(factFile)) {
   {
     const days = []; for (let d = '2026-10-26'; days.length < 731; ) { days.push(d); const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); d = x.toISOString().slice(0, 10); }
     const h = (await import('node:crypto')).createHash('sha256');
-    for (const d of days) h.update(d + JSON.stringify(L.roundsFor(P, d)));
+    for (const d of days) h.update(d + JSON.stringify(L.roundsFor(P1, d)));
     eq('two years of tens from launch, unchanged', h.digest('hex'), 'b9b0a048f7d75d18482c46968cd3e404bba91b3797832fc3b8961f2be2ca2c4f');
+    // The deal players get: launch pool before FRESH_FROM, the fresh one from then on.
+    const g = (await import('node:crypto')).createHash('sha256');
+    for (const d of days) g.update(d + JSON.stringify(L.roundsFor(L.poolFile(d) === 'data/pool-1.json' ? P1 : P, d)));
+    eq('two years of tens as dealt, unchanged', g.digest('hex'), 'd13d00ad870cccbde4cdda633c705b489af4f895f0e85d8dcd895ae20a22cd76');
   }
 } else ok('shipped: site/data/pool.json and test/facts.json exist (run build.py, test/facts.py)', false);
 

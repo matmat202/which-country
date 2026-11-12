@@ -135,6 +135,13 @@ export function dayKey(d = new Date()) {
 // The first day a daily ten was served. ?day= plays any day from here up to yesterday.
 export const FIRST_DAY = '2026-10-26';
 
+// Global Carbon Budget 2026 (OWID, 2026-11-10) added 2025 and revised earlier years: Qatar's
+// 2024 went from 41.3 to 33.2 tonnes. A new pool re-deals every day, and a saved pick is a
+// side, so days already served keep the pool they were played from (pool-1.json). The fresh
+// one starts on a day no time zone had reached when it shipped.
+export const FRESH_FROM = '2026-11-14';
+export const poolFile = (key) => (/^\d{4}-\d{2}-\d{2}$/.test(key) && key < FRESH_FROM ? 'data/pool-1.json' : 'data/pool.json');
+
 export function prevDay(key) {
   const d = new Date(key + 'T12:00:00');
   d.setDate(d.getDate() - 1);

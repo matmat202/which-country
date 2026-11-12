@@ -28,7 +28,7 @@ domain). Both areas come from the same outline, so they're shown to two figures.
 | Question | Chart | Year |
 |---|---|---|
 | Where do people live longer? | [life-expectancy](https://ourworldindata.org/grapher/life-expectancy) | 2023 |
-| Which emits more CO₂ per person? | [co-emissions-per-capita](https://ourworldindata.org/grapher/co-emissions-per-capita) | 2024 |
+| Which emits more CO₂ per person? | [co-emissions-per-capita](https://ourworldindata.org/grapher/co-emissions-per-capita) | 2025 |
 | Which is richer per person? | [gdp-per-capita-worldbank](https://ourworldindata.org/grapher/gdp-per-capita-worldbank) (PPP) | 2025 |
 | Which has more people? | [population](https://ourworldindata.org/grapher/population) | 2023 |
 | Where do more people use the internet? | [share-of-individuals-using-the-internet](https://ourworldindata.org/grapher/share-of-individuals-using-the-internet) | 2024 |
