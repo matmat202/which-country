@@ -91,6 +91,13 @@ export function scales(A, B, w, h, honest) {
   return [A, B].map((c) => fit * f(c));
 }
 
+// How many of a finished day's picks were right; null if that day's ten is unfinished.
+export function dayScore(cs, day, picks, P = pairs(cs)) {
+  const R = roundsFor(cs, day, ROUNDS, P);
+  if (!picks || picks.length < R.length) return null;
+  return R.reduce((n, { a, b }, k) => n + (isRight(cs[a].t, cs[b].t, picks[k]) ? 1 : 0), 0);
+}
+
 export function shareText(day, marks) {
   const score = marks.filter(Boolean).length;
   return `Mercator Trap ${day}: ${score}/${marks.length}\n${marks.map((m) => (m ? '🟩' : '🟥')).join('')}`;

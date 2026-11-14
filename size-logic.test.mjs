@@ -148,6 +148,14 @@ ok('"nearer the equator" scores at most 8 of 10', naive.filter(Boolean).length /
   for (let d = '2026-11-03', k = 0; k < 731; k++) { h.update(d + JSON.stringify(S.roundsFor(CS, d, S.ROUNDS, SP))); const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); d = x.toISOString().slice(0, 10); }
   eq('two years of tens from launch, unchanged', h.digest('hex'), '6a60aabf058e1f81a60ac9c82d4210cc167ccb5f9d4091094a6cb695f9151f6d');
   eq('pair counts', [SP.traps.length, SP.honest.length], [358, 861]);
+  // The record re-scores each finished day. Scored here from the served codes and the raw areas.
+  const code = Object.fromEntries(CS.map((c) => [c.code, c]));
+  const want = (d, picks) => SERVED[d].split(' ').reduce((n, ab, k) => { const [A, B] = ab.split('/').map((x) => code[x]); return n + ((A.t >= B.t ? 0 : 1) === picks[k] ? 1 : 0); }, 0);
+  const lefts = Array(10).fill(0), mixed = [0, 1, 1, 0, 1, 0, 0, 1, 1, 0];
+  for (const d of ['2026-11-07', '2026-11-10']) for (const p of [lefts, mixed]) eq(`${d}: day score of ${p.join('')}`, S.dayScore(CS, d, p, SP), want(d, p));
+  eq('a perfect day scores ten', S.dayScore(CS, '2026-11-09', SERVED['2026-11-09'].split(' ').map((ab) => { const [A, B] = ab.split('/').map((x) => code[x]); return A.t >= B.t ? 0 : 1; }), SP), 10);
+  ok('the two pick lists score differently somewhere', ['2026-11-07', '2026-11-10'].some((d) => want(d, lefts) !== want(d, mixed)));
+  eq('an unfinished day has no score', [S.dayScore(CS, '2026-11-07', [0, 1, 0], SP), S.dayScore(CS, '2026-11-07', null, SP)], [null, null]);
 }
 
 console.log(`${pass} passed, ${fail} failed`);

@@ -1,6 +1,6 @@
 // Mercator Trap — the page. Pure logic lives in size-logic.js (and the day machinery in country-logic.js).
 import * as S from './size-logic.js';
-import { dayKey, streak } from './country-logic.js';
+import { dayKey, streak, bestStreak, record } from './country-logic.js';
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -127,6 +127,7 @@ function drawEnd() {
   const traps = game.rounds.map((_, k) => at(k)).filter(({ A, B }) => S.isTrap(A, B)).length;
   const fell = game.rounds.filter((_, k) => { const { A, B } = at(k); return S.isTrap(A, B) && !m[k]; }).length;
   $('traps').textContent = `${traps} of the ${m.length} were traps; you fell into ${fell}.`;
+  drawRecord(score);
   $('share').hidden = game.practice;
   $('copied').textContent = '';
   $('recap').replaceChildren(...game.rounds.map((_, k) => {
@@ -138,6 +139,28 @@ function drawEnd() {
     const t = document.createElement('span'); t.className = 't'; t.textContent = `${h.name} over ${l.name}${S.isTrap(A, B) ? ' (trap)' : ''}`;
     const d = document.createElement('span'); d.className = 'd'; d.textContent = `${S.fmtArea(h.t)} vs ${S.fmtArea(l.t)}`;
     li.append(mk, t, d);
+    return li;
+  }));
+}
+
+// Every daily ten finished on this device, with the score this ten got highlighted.
+// Practice tens are not part of it.
+function drawRecord(score) {
+  $('rec').hidden = game.practice;
+  if (game.practice) return;
+  const days = [...new Set(store.get('wcm:days', []))];
+  const scores = days.map((d) => S.dayScore(CS, d, store.get('wcm:' + d, null), P)).filter((s) => s != null);
+  const r = record(scores, game.rounds.length);
+  $('recline').textContent = `${r.played} played · average ${r.avg.toFixed(1)} · best streak ${bestStreak(days)}`;
+  const top = Math.max(1, ...r.dist);
+  $('dist').replaceChildren(...r.dist.map((c, s) => {
+    const li = document.createElement('li');
+    if (s === score) li.className = 'me';
+    li.title = `${c} ${c === 1 ? 'ten' : 'tens'} scored ${s}`;
+    li.setAttribute('aria-label', li.title);
+    const bar = document.createElement('i'); bar.style.height = `${(c / top) * 70}%`;
+    const n = document.createElement('span'); n.textContent = String(s);
+    li.append(bar, n);
     return li;
   }));
 }
