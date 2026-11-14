@@ -178,3 +178,40 @@ export function streak(days, today) {
   while (have.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
   return n;
 }
+
+// The longest run of consecutive days in `days` (a list of dayKeys, any order).
+export function bestStreak(days) {
+  const have = new Set(days);
+  let best = 0;
+  for (const d of have) {
+    if (have.has(prevDay(d))) continue; // not the start of a run
+    let n = 0;
+    for (let k = d; have.has(k); k = nextDay(k)) n++;
+    best = Math.max(best, n);
+  }
+  return best;
+}
+
+export function nextDay(key) {
+  const d = new Date(key + 'T12:00:00');
+  d.setDate(d.getDate() + 1);
+  return dayKey(d);
+}
+
+// A player's record over every daily ten they finished (today's or an earlier ?day=).
+// `scores` is a list of right-answer counts; dist[s] is how many tens scored s of `n`.
+export function record(scores, n = ROUNDS) {
+  const dist = Array(n + 1).fill(0);
+  for (const s of scores) dist[s]++;
+  const played = scores.length;
+  const avg = played ? scores.reduce((a, b) => a + b, 0) / played : 0;
+  return { played, avg: Math.round(avg * 10) / 10, dist };
+}
+
+// How many of a finished day's picks were right; null if that day's ten is unfinished.
+// `pool` must be the one that day was dealt from (poolFile(day)).
+export function dayScore(pool, day, picks) {
+  const R = roundsFor(pool, day);
+  if (!picks || picks.length < R.length) return null;
+  return R.reduce((n, x, k) => n + (isRight(pool.values[x.m][x.a], pool.values[x.m][x.b], picks[k]) ? 1 : 0), 0);
+}

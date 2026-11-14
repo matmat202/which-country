@@ -77,6 +77,24 @@ eq('fits at both edges', [L.fits(fake, R, 'kids', R.kids.r.indexOf(0), R.kids.r.
   L.fits(fake, R, 'kids', R.kids.r.indexOf(0), R.kids.r.indexOf(N - 1), [0, 0.99])], [true, false]);
 const look = { countries: [['a', 'A'], ['b', 'B'], ['c', 'C']], metrics: [{ id: 'net' }], values: { net: [84.6, 85.2, 10] } };
 eq('fits refuses two that show the same number', [L.fits(look, L.ranks(look), 'net', 0, 1, [0, 1]), L.fits(look, L.ranks(look), 'net', 0, 2, [0, 1])], [false, true]);
+// --- the record (played, average, best streak, distribution) ---------------------------
+eq('best streak is the longest run, not the current one',
+  L.bestStreak(['2026-10-26', '2026-10-27', '2026-10-28', '2026-11-01', '2026-11-02']), 3);
+eq('best streak in any order, across a month end', L.bestStreak(['2026-11-01', '2026-10-30', '2026-10-31', '2026-10-05']), 3);
+eq('best streak of nothing', L.bestStreak([]), 0);
+eq('best streak counts a day once', L.bestStreak(['2026-10-26', '2026-10-26']), 1);
+eq('next day crosses a month and a year', [L.nextDay('2026-10-31'), L.nextDay('2026-12-31')], ['2026-11-01', '2027-01-01']);
+eq('record: played, average to one place, distribution', L.record([9, 7, 9], 10),
+  { played: 3, avg: 8.3, dist: [0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0] });
+eq('record of nothing', L.record([], 3), { played: 0, avg: 0, dist: [0, 0, 0, 0] });
+{
+  const right = day.map((x) => L.higherIndex(fake.values[x.m][x.a], fake.values[x.m][x.b]));
+  eq('day score: all right', L.dayScore(fake, '2026-10-26', right.slice()), 10);
+  eq('day score: one wrong', L.dayScore(fake, '2026-10-26', right.map((r, k) => (k ? r : 1 - r))), 9);
+  eq('day score: all wrong', L.dayScore(fake, '2026-10-26', right.map((r) => 1 - r)), 0);
+  eq('day score: unfinished is null', [L.dayScore(fake, '2026-10-26', right.slice(0, -1)), L.dayScore(fake, '2026-10-26', null)], [null, null]);
+  eq('day score is marked against that day\'s deal', L.dayScore(fake, '2026-10-27', right) === 10, false);
+}
 eq('fits refuses a missing value', L.fits(fake, R, 'net', 3, 4, [0, 1]), false);
 const many = Array.from({ length: 30 }, (_, k) => L.roundsFor(fake, `s${k}`)).flat();
 const sides = many.map((x) => L.higherIndex(fake.values[x.m][x.a], fake.values[x.m][x.b]));

@@ -68,6 +68,13 @@ h2.q{font-size:18px;margin:6px 0 10px;text-align:center}
 .end{text-align:center}
 .end .score{font-size:40px;font-weight:700;margin:4px 0 0}
 .end p{margin:4px 0;color:var(--ink-2)}
+.rec{margin:10px auto 0;max-width:330px}
+.rec p{font-size:13px;margin:0 0 6px}
+.rec ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(11,1fr);gap:3px;align-items:end;height:64px;border-bottom:2px solid var(--line)}
+.rec li{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:11px;color:var(--ink-3)}
+.rec li i{display:block;width:100%;background:var(--ink-3);border-radius:3px 3px 0 0}
+.rec li.me i{background:var(--accent)}.rec li.me{color:var(--ink);font-weight:700}
+.rec li span{font-variant-numeric:tabular-nums;line-height:1.5}
 ol.recap{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px}
 ol.recap li{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;display:flex;gap:8px;align-items:baseline}
 ol.recap li .m{font-weight:700;width:1.2em;flex:none}
@@ -102,6 +109,7 @@ footer{font-size:12px;color:var(--ink-2);line-height:1.5;margin:18px 2px 8px}
   <p id="endday"></p>
   <div class="score" id="score"></div>
   <p id="streak"></p>
+  <div class="rec" id="rec" hidden><p id="recline"></p><ol id="dist" aria-label="Your scores so far"></ol></div>
   <div class="go">
     <button type="button" id="share">Copy result</button>
     <button type="button" id="practice" class="ghost">Practice ten more</button>
