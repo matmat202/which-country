@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One number · how far children per woman gets you in Which Country?</title>
+<meta name="description" content="A scrolling story from the Which Country? game: a player who knows only how many children a woman has in each country, and picks the one with fewer, scores about 8 in 10. Until the last rounds, where the countries are close.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="plot" aria-hidden="true"><div id="axes"></div></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<p id="err" role="alert"></p>
+<main>
+
+<section class="step" data-kind="scatter:life"><div>
+  <p class="kicker">Which Country? · a story</p>
+  <h1>One number</h1>
+  <p>The daily game <a href="../">Which Country?</a> shows two countries and asks which is
+  higher: who lives longer, who is richer, whose population is older. Eight questions,
+  <b data-fact="n"></b> countries.</p>
+  <p>Here is a shortcut that knows one thing per country: how many children a woman there
+  has, on average. It always picks the country with <span class="w">fewer</span>.</p>
+  <p>Each dot is a country. Left to right, children per woman, from <b data-fact="kidsmin"></b>
+  in <b data-fact="kidslow"></b> to <b data-fact="kidsmax"></b> in <b data-fact="kidshigh"></b>.
+  Up the side, its rank in life expectancy. The line falls the whole way: fewer children,
+  longer lives.</p>
+  <p class="small">Rank correlation <b data-fact="rho:life"></b>. In the game's own
+  life-expectancy rounds the shortcut is right <b data-fact="acc:life"></b> of the time.
+  Scroll ↓</p>
+</div></section>
+
+<section class="step" data-kind="scatter:age"><div>
+  <p class="kicker">Chapter 1 · Median age</p>
+  <h2>Almost the same number</h2>
+  <p>Which population is older? Where women have fewer children, almost always. The dots
+  hug the line more tightly here than for any other question.</p>
+  <p class="small">Rank correlation <b data-fact="rho:age"></b>; right in
+  <b data-fact="acc:age"></b> of <b data-fact="asked:age"></b> age rounds.</p>
+</div></section>
+
+<section class="step" data-kind="scatter:gdp"><div>
+  <p class="kicker">Chapter 2 · Income</p>
+  <h2>Money, and the internet</h2>
+  <p>Which is richer per person? Fewer children again: right <b data-fact="acc:gdp"></b> of
+  the time. Who has more people online: <b data-fact="acc:net"></b>. CO₂ per person:
+  <b data-fact="acc:co2"></b>.</p>
+  <p class="small">Income rank correlation <b data-fact="rho:gdp"></b>. The
+  <b data-fact="missing:gdp"></b> countries without an income figure are left out of this
+  chart.</p>
+</div></section>
+
+<section class="step" data-kind="scatter:urban"><div>
+  <p class="kicker">Chapter 3 · Towns and cities</p>
+  <h2>The weakest link</h2>
+  <p>Which is more urban? The line still falls, but the cloud is wide. Some countries
+  with few children are rural, some with many are mostly cities. Right
+  <b data-fact="acc:urban"></b> of the time, the shortcut's worst.</p>
+  <p class="small">Rank correlation <b data-fact="rho:urban"></b>.</p>
+</div></section>
+
+<section class="step" data-kind="scatter:pop"><div>
+  <p class="kicker">Chapter 4 · Population</p>
+  <h2>The one it cannot do</h2>
+  <p>Which has more people? Children per woman says nothing about it. India and China, the
+  two biggest, have fewer children than average. Nigeria and Pakistan have more. So on this
+  question the shortcut flips a coin.</p>
+  <p class="small">Rank correlation <b data-fact="rho:pop"></b>.</p>
+</div></section>
+
+<section class="step" data-kind="columns:metrics"><div>
+  <p class="kicker">Chapter 5 · The score</p>
+  <h2><b data-fact="score"></b> out of 10</h2>
+  <p>Over <b data-fact="years"></b> years of the game's daily tens, the shortcut averages
+  <b data-fact="score"></b> right a day. On "where do women have more children?" it knows the
+  answer. On population it guesses. On the other six it is right
+  <b data-fact="acc"></b> of the time.</p>
+  <p class="small">Every round the game will serve from its first day for
+  <b data-fact="days"></b> days: <b data-fact="asked"></b> rounds where the shortcut is the
+  whole answer.</p>
+</div></section>
+
+<section class="step" data-kind="columns:rounds"><div>
+  <p class="kicker">Chapter 6 · Round by round</p>
+  <h2>Until the countries get close</h2>
+  <p>The game starts with two countries worlds apart and ends with two neck and neck. The
+  shortcut fades round by round: right <b data-fact="real:1"></b> of the time in round 1,
+  <b data-fact="real:5"></b> in round 5, and <b data-fact="real:10"></b> in round 10, barely
+  better than a coin.</p>
+  <p>That is what the last rounds are for. A broad sense of which countries are rich and
+  which are poor gets you through the start. At the end you have to know the numbers.</p>
+  <p class="small">Population and children rounds left out; about
+  <b data-fact="roundasked:10"></b> rounds in each column.</p>
+</div></section>
+
+<section class="step" data-kind="columns:shuffled"><div>
+  <p class="kicker">Chapter 7 · The control</p>
+  <h2>Is it the number, or the rounds?</h2>
+  <p>Maybe any number would do this well on these pairs. So: deal the children-per-woman
+  figures out to the countries at random, <b data-fact="perm"></b> times, and play the same
+  rounds with each shuffled number.</p>
+  <p>It scores half in every round. A day's total comes to <b data-fact="shufscore"></b>, not 5,
+  only because it still knows the answer to its own question; the best of the
+  <b data-fact="perm"></b> shuffles managed <b data-fact="shufscoremax"></b>.</p>
+  <p>The real number beat every shuffle in every round, round 10 included:
+  <b data-fact="real:10"></b> against a best shuffle of <b data-fact="shufmax:10"></b>. Small, but
+  not chance.</p>
+</div></section>
+
+<section class="step" data-kind="columns:metrics"><div>
+  <p class="kicker">Coda · Play it</p>
+  <h2>Ten a day</h2>
+  <p>This page measures that the shortcut works, not why. Falling birth rates, longer lives,
+  older populations and higher incomes tend to arrive together, and one number happens to
+  stand in for all of them.</p>
+  <p><a href="../">Which Country?</a> asks ten a day. Now you know how to get through the
+  first few.</p>
+  <p class="small">From Our World in Data (CC BY 4.0), the same figures the game uses:
+  children per woman for <b data-fact="kidsyear"></b>. Rank correlations are Spearman's, with
+  tied ranks averaged. The rounds are the game's own, made by its code for each day. The
+  control shuffles the number <b data-fact="perm"></b> times, seeded. The source and the build
+  are in the <a href="https://github.com/matmat202/which-country">repository</a>.</p>
+</div></section>
+
+</main>
+<script type="module" src="story.js"></script>
+</body>
+</html>

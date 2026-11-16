@@ -20,6 +20,17 @@ Sweden and Chad). The other three are honest, so "always pick the one nearer the
 loses. Outlines are [Natural Earth](https://www.naturalearthdata.com/) 1:110m (public
 domain). Both areas come from the same outline, so they're shown to two figures.
 
+## One number (the story)
+
+**<https://matmat202.github.io/which-country/story/>**
+
+A scrolling story measured from the game's own rounds (`build_story.py`, which runs the
+game's code through `story_rounds.mjs` for ten years of days). A player who knows only
+children per woman, and always picks the country with fewer, scores 7.8 in 10: right 97%
+of the time in round 1, 57% in round 10. The control deals that number out to the countries
+at random 200 times; the shuffles score half in every round, and the real number beats all
+of them in every round.
+
 ## Where the numbers come from
 
 [Our World in Data](https://ourworldindata.org/) grapher charts, all openly licensed (CC BY
