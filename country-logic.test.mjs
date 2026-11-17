@@ -126,6 +126,8 @@ eq('pastDay refuses non-dates', ['2026-11-31', '2027-02-29', '2026-13-01', '26-1
 const played = new Set(['2026-10-29', '2026-10-28']);
 eq('missedDay skips played days', L.missedDay('2026-10-30', (d) => played.has(d)), '2026-10-27');
 eq('missedDay is yesterday when unplayed', L.missedDay('2026-10-30', () => false), '2026-10-29');
+eq('pastDay honours a later first day', ['2026-11-02', '2026-11-03'].map((p) => L.pastDay(p, '2026-11-16', '2026-11-03')), [null, '2026-11-03']);
+eq('missedDay stops at a later first day', [L.missedDay('2026-11-04', (d) => d === '2026-11-03', '2026-11-03'), L.missedDay('2026-11-04', () => false, '2026-11-03')], [null, '2026-11-03']);
 eq('missedDay stops at the first day', [L.missedDay('2026-10-30', () => true), L.missedDay(L.FIRST_DAY, () => false)], [null, null]);
 
 // --- the shipped pool ---------------------------------------------------------------------

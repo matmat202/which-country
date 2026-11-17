@@ -6,6 +6,7 @@
 import { hash, rng } from './country-logic.js';
 
 export const ROUNDS = 10;
+export const FIRST_DAY = '2026-11-03'; // the Mercator Trap's first ten; ?day= goes back no further
 export const HONEST = 3;          // rounds a day where the one drawn bigger really is bigger
 export const TRUE_GAP = 1.15;     // the truly bigger is at least this much bigger: 1:110m can't flip it
 export const TRAP_GAP = 1.3;      // a trap's truly smaller one is drawn at least this much bigger

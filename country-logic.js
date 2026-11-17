@@ -148,19 +148,20 @@ export function prevDay(key) {
   return dayKey(d);
 }
 
-// A ?day= worth honouring: a real calendar date, FIRST_DAY or later and before `today`.
-// Anything else is null, and the page plays today's ten.
-export function pastDay(param, today) {
+// A ?day= worth honouring: a real calendar date, `first` or later and before `today`.
+// Anything else is null, and the page plays today's ten. `first` is the game's own first
+// day: the Mercator Trap started after FIRST_DAY.
+export function pastDay(param, today, first = FIRST_DAY) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(param || '')) return null;
   const d = new Date(param + 'T12:00:00');
   if (Number.isNaN(d.getTime()) || dayKey(d) !== param) return null;
-  return param >= FIRST_DAY && param < today ? param : null;
+  return param >= first && param < today ? param : null;
 }
 
-// The latest day before `from` whose ten is unfinished, back to FIRST_DAY; null if none.
+// The latest day before `from` whose ten is unfinished, back to `first`; null if none.
 // `done(day)` says whether that day's ten was played to the end.
-export function missedDay(from, done) {
-  for (let d = prevDay(from); d >= FIRST_DAY; d = prevDay(d)) if (!done(d)) return d;
+export function missedDay(from, done, first = FIRST_DAY) {
+  for (let d = prevDay(from); d >= first; d = prevDay(d)) if (!done(d)) return d;
   return null;
 }
 

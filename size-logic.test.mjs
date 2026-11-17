@@ -12,6 +12,13 @@ const ok = (name, cond, extra = '') => { if (cond) pass++; else { fail++; consol
 const eq = (name, a, b) => ok(name, JSON.stringify(a) === JSON.stringify(b), `got ${JSON.stringify(a)} want ${JSON.stringify(b)}`);
 
 // --- small pieces ----------------------------------------------------------------------
+// ?day= reaches back to the Mercator Trap's own first day, not the main game's.
+{
+  const L = await import('./country-logic.js');
+  eq('the first day is launch day', S.FIRST_DAY, '2026-11-03');
+  eq('?day= takes launch day and later, not before', ['2026-11-02', '2026-11-03', '2026-11-15', '2026-11-16'].map((p) => L.pastDay(p, '2026-11-16', S.FIRST_DAY)), [null, '2026-11-03', '2026-11-15', null]);
+  eq('the missed-day link stops at launch day', [L.missedDay('2026-11-05', () => false, S.FIRST_DAY), L.missedDay('2026-11-05', (d) => d !== '2026-11-03', S.FIRST_DAY), L.missedDay('2026-11-04', (d) => d === '2026-11-03', S.FIRST_DAY)], ['2026-11-04', '2026-11-03', null]);
+}
 eq('areas to two figures', [S.fmtArea(16635777), S.fmtArea(2190190), S.fmtArea(593399), S.fmtArea(64123), S.fmtArea(20480)],
   ['17 million km²', '2.2 million km²', '590,000 km²', '64,000 km²', '20,000 km²']);
 eq('times', [S.times(1.19), S.times(2.5), S.times(16.53), S.times(1.951)], ['19%', '2.5 times', '17 times', '2.0 times']);

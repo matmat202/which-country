@@ -1,6 +1,6 @@
 // Mercator Trap — the page. Pure logic lives in size-logic.js (and the day machinery in country-logic.js).
 import * as S from './size-logic.js';
-import { dayKey, streak, bestStreak, record } from './country-logic.js';
+import { dayKey, prevDay, pastDay, missedDay, streak, bestStreak, record } from './country-logic.js';
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -10,20 +10,21 @@ const store = {
 const BOX = 184; // px of the 200-px viewBox a country may fill
 
 let CS = null, P = null;
-let game = null; // { key, day, practice, rounds, picks, showing }
+let game = null; // { key, day, practice, past, rounds, picks, showing }
 
-function start(practice) {
-  const day = dayKey();
+// `past` is an earlier day's ten (from ?day=): saved, shareable, in the record, outside the streak.
+function start(practice, past = null) {
+  const day = past || dayKey();
   const key = practice ? `practice-${Date.now().toString(36)}` : day;
-  game = { key, day, practice, rounds: S.roundsFor(CS, key, S.ROUNDS, P), picks: practice ? [] : store.get('wcm:' + day, []) };
-  $('daily').hidden = !practice;
+  game = { key, day, practice, past: !!past && !practice, rounds: S.roundsFor(CS, key, S.ROUNDS, P), picks: practice ? [] : store.get('wcm:' + day, []) };
+  $('daily').hidden = !practice && !game.past;
   render();
 }
 
 function save() {
   if (game.practice) return;
   store.set('wcm:' + game.day, game.picks);
-  if (game.picks.length === game.rounds.length) {
+  if (game.picks.length === game.rounds.length && !game.past) {
     const days = store.get('wcm:days', []);
     if (!days.includes(game.day)) { days.push(game.day); store.set('wcm:days', days.slice(-400)); }
   }
@@ -119,16 +120,20 @@ function next() {
 
 function drawEnd() {
   const m = marks(), score = m.filter(Boolean).length;
-  $('endday').textContent = game.practice ? 'Practice ten' : `Today's ten · ${game.day}`;
+  $('endday').textContent = game.practice ? 'Practice ten' : `${game.past ? 'Earlier' : 'Today\'s'} ten · ${game.day}`;
   $('score').textContent = `${score} / ${m.length}`;
   const s = streak(store.get('wcm:days', []), game.day);
   $('streak').textContent = game.practice ? 'Practice rounds do not count toward your streak.'
+    : game.past ? 'Earlier days do not count toward your streak.'
     : `${s === 1 ? 'First day of a streak' : `${s}-day streak`}. A new ten tomorrow.`;
   const traps = game.rounds.map((_, k) => at(k)).filter(({ A, B }) => S.isTrap(A, B)).length;
   const fell = game.rounds.filter((_, k) => { const { A, B } = at(k); return S.isTrap(A, B) && !m[k]; }).length;
   $('traps').textContent = `${traps} of the ${m.length} were traps; you fell into ${fell}.`;
   drawRecord(score);
   $('share').hidden = game.practice;
+  const miss = game.practice ? null : missedDay(game.day, (d) => store.get('wcm:' + d, []).length >= game.rounds.length, S.FIRST_DAY);
+  $('earlier').hidden = !miss;
+  if (miss) { $('earlier').href = `?day=${miss}`; $('earlier').textContent = miss === prevDay(dayKey()) ? "Missed yesterday? Play yesterday's ten" : `Play the ten from ${miss}`; }
   $('copied').textContent = '';
   $('recap').replaceChildren(...game.rounds.map((_, k) => {
     const { A, B } = at(k);
@@ -143,15 +148,19 @@ function drawEnd() {
   }));
 }
 
-// Every daily ten finished on this device, with the score this ten got highlighted.
-// Practice tens are not part of it.
+// Every daily ten finished on this device (today's, or an earlier one via ?day=), with the
+// score this ten got highlighted. Practice tens are not part of it. The streak counts only
+// tens played on their own day (wcm:days); the record reads every saved day back to FIRST_DAY.
 function drawRecord(score) {
   $('rec').hidden = game.practice;
   if (game.practice) return;
-  const days = [...new Set(store.get('wcm:days', []))];
-  const scores = days.map((d) => S.dayScore(CS, d, store.get('wcm:' + d, null), P)).filter((s) => s != null);
+  const scores = [];
+  for (let d = dayKey(); d >= S.FIRST_DAY; d = prevDay(d)) {
+    const s = S.dayScore(CS, d, store.get('wcm:' + d, null), P);
+    if (s != null) scores.push(s);
+  }
   const r = record(scores, game.rounds.length);
-  $('recline').textContent = `${r.played} played · average ${r.avg.toFixed(1)} · best streak ${bestStreak(days)}`;
+  $('recline').textContent = `${r.played} played · average ${r.avg.toFixed(1)} · best streak ${bestStreak(store.get('wcm:days', []))}`;
   const top = Math.max(1, ...r.dist);
   $('dist').replaceChildren(...r.dist.map((c, s) => {
     const li = document.createElement('li');
@@ -175,7 +184,7 @@ $('pick').addEventListener('click', (e) => { const b = e.target.closest('button'
 $('next').addEventListener('click', next);
 $('share').addEventListener('click', share);
 $('practice').addEventListener('click', () => start(true));
-$('daily').addEventListener('click', () => start(false));
+$('daily').addEventListener('click', () => { if (location.search) history.replaceState(null, '', location.pathname); start(false); });
 document.addEventListener('keydown', (e) => {
   if (!game || e.metaKey || e.ctrlKey || e.altKey) return;
   if (game.showing == null && !$('play').hidden) {
@@ -189,7 +198,7 @@ document.addEventListener('keydown', (e) => {
 fetch('data/shapes.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
   CS = d.countries; P = S.pairs(CS);
   $('count').textContent = CS.length.toLocaleString('en-US');
-  start(false);
+  start(false, pastDay(new URLSearchParams(location.search).get('day'), dayKey(), S.FIRST_DAY));
 }).catch((e) => {
   $('round').textContent = '';
   $('out').textContent = `Could not load the outlines (${e.message}). Reload to try again.`;
