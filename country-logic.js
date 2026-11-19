@@ -120,9 +120,19 @@ export function times(hi, lo) {
   return `${num(Math.round((x - 1) * 100))}% higher`;
 }
 
+// A share or a span of years reads best as a gap in its own unit: 92% against 80% is
+// "12 percentage points higher", which "15% higher" passes off as 15 points. The gap is
+// taken between the numbers as shown, so the player's own subtraction agrees with it.
+export function gap(id, hi, lo) {
+  const unit = { net: 'percentage points higher', urban: 'percentage points higher', life: 'years longer', age: 'years older' }[id];
+  if (!unit) return times(hi, lo);
+  const d = parseFloat(fmt(id, hi)) - parseFloat(fmt(id, lo));
+  return id === 'net' || id === 'urban' ? `${num(d)} ${d === 1 ? 'percentage point higher' : unit}` : `${num(d, 1)} ${unit}`;
+}
+
 export function verdict(metric, an, av, bn, bv) {
   const [hn, hv, ln, lv] = higherIndex(av, bv) === 0 ? [an, av, bn, bv] : [bn, bv, an, av];
-  const t = times(hv, lv);
+  const t = gap(metric.id, hv, lv);
   return `${hn}: ${fmt(metric.id, hv)}. ${ln}: ${fmt(metric.id, lv)}.${t ? ` ${t[0].toUpperCase()}${t.slice(1)}.` : ''}`;
 }
 

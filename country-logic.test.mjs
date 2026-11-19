@@ -29,7 +29,14 @@ eq('a tie is right either way', [L.isRight(2, 2, 0), L.isRight(2, 2, 1)], [true,
 eq('times', [L.times(30, 10), L.times(11, 10), L.times(140, 10), L.times(19.4, 10), L.times(5, 0)],
   ['3.0 times as high', '10% higher', '14 times as high', '94% higher', '']);
 eq('verdict names the higher first', L.verdict({ id: 'life' }, 'Nigeria', 54.46, 'Japan', 84.71),
-  'Japan: 84.7 years. Nigeria: 54.5 years. 56% higher.');
+  'Japan: 84.7 years. Nigeria: 54.5 years. 30.2 years longer.');
+// A share's gap is in points, years are years, and both come from the numbers as shown:
+// 75.84 and 74.36 show as 75.8 and 74.4, so 1.4 years, not the raw 1.48 -> 1.5.
+eq('gap: points and years, from the shown numbers', [L.gap('urban', 92.4, 79.6), L.gap('net', 98.6, 67.5), L.gap('net', 51.4, 49.6),
+  L.gap('life', 75.84, 74.36), L.gap('age', 29.6, 17.8), L.gap('gdp', 30, 10), L.gap('kids', 4.61, 4.48)],
+  ['12 percentage points higher', '31 percentage points higher', '1 percentage point higher', '1.4 years longer', '11.8 years older', '3.0 times as high', '3% higher']);
+eq('verdict on a share speaks in points', L.verdict({ id: 'urban' }, 'United States', 79.6, 'Japan', 92.4),
+  'Japan: 92%. United States: 80%. 12 percentage points higher.');
 eq('day key is local', L.dayKey(new Date(2026, 9, 26, 23, 30)), '2026-10-26');
 eq('share', L.shareText('2026-10-26', [true, false, true]), 'Which Country? 2026-10-26: 2/3\n🟩🟥🟩');
 eq('streak', [L.streak(['2026-10-24', '2026-10-25', '2026-10-26'], '2026-10-26'), L.streak(['2026-10-24', '2026-10-25'], '2026-10-26'),
@@ -45,7 +52,7 @@ eq('metric order, pinned (the shuffle and the no-repeat rotation)', [L.metricOrd
   [['c', 'e', 'b', 'a', 'd', 'c', 'a', 'e', 'b', 'd', 'e', 'd'], ['b', 'a', 'b', 'a', 'b']]);
 eq('the bands, as designed', L.BANDS, [[0.5, 1], [0.4, 0.8], [0.3, 0.6], [0.24, 0.48], [0.18, 0.38], [0.12, 0.3], [0.08, 0.22], [0.05, 0.16], [0.03, 0.11], [0.012, 0.07]]);
 eq('pop: a billion is the first "billion"', [L.fmt('pop', 1e9), L.fmt('pop', 999.4e6), L.fmt('pop', 1e8), L.fmt('pop', 99.94e6)], ['1.00 billion', '999 million', '100 million', '99.9 million']);
-eq('a tie: the first named is "higher"', [L.higherIndex(5, 5), L.verdict({ id: 'net' }, 'A', 5, 'B', 5)], [0, 'A: 5%. B: 5%. 0% higher.']);
+eq('a tie: the first named is "higher"', [L.higherIndex(5, 5), L.verdict({ id: 'net' }, 'A', 5, 'B', 5)], [0, 'A: 5%. B: 5%. 0 percentage points higher.']);
 eq('times: 1.95 is the first "times as high", and lo = 1 is not zero', [L.times(19.5, 10), L.times(19.49, 10), L.times(5, 1)], ['2.0 times as high', '95% higher', '5.0 times as high']);
 eq('missedDay reaches FIRST_DAY itself, and no further', [L.missedDay('2026-10-27', () => false), L.missedDay('2026-10-27', (d) => d !== '2026-10-26'), L.missedDay('2026-10-26', () => false)],
   ['2026-10-26', '2026-10-26', null]);
