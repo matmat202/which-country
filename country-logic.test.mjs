@@ -39,6 +39,10 @@ eq('verdict on a share speaks in points', L.verdict({ id: 'urban' }, 'United Sta
   'Japan: 92%. United States: 80%. 12 percentage points higher.');
 eq('day key is local', L.dayKey(new Date(2026, 9, 26, 23, 30)), '2026-10-26');
 eq('share', L.shareText('2026-10-26', [true, false, true]), 'Which Country? 2026-10-26: 2/3\n🟩🟥🟩');
+{ // the shared link deals the shared day: opened later it is that day's ten, opened the same day it is today's
+  const link = L.shareLink('https://x.test/wc/', '2026-11-15'), q = new URL(link).searchParams.get('day');
+  eq('share link carries its day', [link, L.pastDay(q, '2026-11-21'), L.pastDay(q, '2026-11-15')], ['https://x.test/wc/?day=2026-11-15', '2026-11-15', null]);
+}
 eq('streak', [L.streak(['2026-10-24', '2026-10-25', '2026-10-26'], '2026-10-26'), L.streak(['2026-10-24', '2026-10-25'], '2026-10-26'),
   L.streak(['2026-10-23', '2026-10-25'], '2026-10-26'), L.streak([], '2026-10-26')], [3, 2, 1, 0]);
 const ord = L.metricOrder(['a', 'b', 'c', 'd'], L.rng(3), 10);

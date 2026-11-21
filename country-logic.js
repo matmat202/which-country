@@ -175,6 +175,11 @@ export function missedDay(from, done, first = FIRST_DAY) {
   return null;
 }
 
+// The link a shared result carries: that day's ten, so a friend who opens it tomorrow, or
+// a share of an earlier ten, plays the ten being compared. On the day itself the page
+// drops ?day= (pastDay is null for today) and plays today's ten as usual.
+export const shareLink = (base, day) => `${base}?day=${day}`;
+
 export function shareText(day, marks) {
   const score = marks.filter(Boolean).length;
   return `Which Country? ${day}: ${score}/${marks.length}\n${marks.map((m) => (m ? '🟩' : '🟥')).join('')}`;

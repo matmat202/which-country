@@ -191,7 +191,7 @@ function drawRecord(score) {
 }
 
 async function share() {
-  const text = L.shareText(game.day, marks()) + '\nhttps://matmat202.github.io/which-country/';
+  const text = L.shareText(game.day, marks()) + '\n' + L.shareLink('https://matmat202.github.io/which-country/', game.day);
   try { await navigator.clipboard.writeText(text); $('copied').textContent = 'Copied.'; }
   catch { $('copied').textContent = text; }
 }
@@ -216,4 +216,8 @@ function fail(e) {
   $('out').textContent = `Could not load the numbers (${e.message}). Reload to try again.`;
 }
 
-start(false, L.pastDay(new URLSearchParams(location.search).get('day'), L.dayKey()));
+// A shared link carries ?day=; opened on that day it is today's ten, so drop it from the
+// address, or the tab would replay this date tomorrow.
+const past0 = L.pastDay(new URLSearchParams(location.search).get('day'), L.dayKey());
+if (!past0 && location.search) history.replaceState(null, '', location.pathname);
+start(false, past0);

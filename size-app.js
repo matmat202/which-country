@@ -1,6 +1,6 @@
 // Mercator Trap — the page. Pure logic lives in size-logic.js (and the day machinery in country-logic.js).
 import * as S from './size-logic.js';
-import { dayKey, prevDay, pastDay, missedDay, streak, bestStreak, record } from './country-logic.js';
+import { dayKey, prevDay, pastDay, missedDay, streak, bestStreak, record, shareLink } from './country-logic.js';
 
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -175,7 +175,7 @@ function drawRecord(score) {
 }
 
 async function share() {
-  const text = S.shareText(game.day, marks()) + '\nhttps://matmat202.github.io/which-country/size.html';
+  const text = S.shareText(game.day, marks()) + '\n' + shareLink('https://matmat202.github.io/which-country/size.html', game.day);
   try { await navigator.clipboard.writeText(text); $('copied').textContent = 'Copied.'; }
   catch { $('copied').textContent = text; }
 }
@@ -198,7 +198,9 @@ document.addEventListener('keydown', (e) => {
 fetch('data/shapes.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
   CS = d.countries; P = S.pairs(CS);
   $('count').textContent = CS.length.toLocaleString('en-US');
-  start(false, pastDay(new URLSearchParams(location.search).get('day'), dayKey(), S.FIRST_DAY));
+  const past0 = pastDay(new URLSearchParams(location.search).get('day'), dayKey(), S.FIRST_DAY);
+  if (!past0 && location.search) history.replaceState(null, '', location.pathname); // a shared link opened on its own day
+  start(false, past0);
 }).catch((e) => {
   $('round').textContent = '';
   $('out').textContent = `Could not load the outlines (${e.message}). Reload to try again.`;
